@@ -1,0 +1,421 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title> Audio Visualization </title>
+</head>
+
+<style>
+
+	body {
+	  margin: 0;
+	  background: #222;
+	  min-width: 960px;
+	}
+
+	/*#chart {
+		margin-top: 100px;
+	}*/
+
+	rect {
+	  fill: none;
+	  pointer-events: all;
+	}
+
+	circle {
+	  fill: none;
+	  stroke-width: 2.5px;
+	}
+
+	rect.bordered {
+		stroke: #E6E6E6;
+		stroke-width:2px;   
+	}
+
+	text.mono {
+		font-size: 9pt;
+		font-family: Consolas, courier;
+		fill: #aaa;
+	}
+
+	text.axis-workweek {
+		fill: #000;
+	}
+
+	text.axis-worktime {
+		fill: #000;
+	}
+</style>
+<body>		
+	<input id="fileChooseInput" type="file"></input>
+	<button onclick="playSound(myAudioBuffer)">Play</button>
+	<button onclick="stopSound()">Stop</button>	  
+	<div id="displays"></div>
+	<div id="chart"></div>
+
+	<script src="http://d3js.org/d3.v3.js"></script>
+
+	<script>	
+		var width = 1200;
+		height = 400;
+		var i = 0;
+
+		var svgC = d3.select("#displays").append("svg")
+			.attr("id","displaySvg")
+		    .attr("width", width)
+		    .attr("height", height);
+
+		svgC.append("rect")
+			.attr("id", "circles")
+		    .attr("width", width)
+		    .attr("height", height)
+		    .on(particle);
+
+		function particle(inAmplitude, inStep) {
+		  //var m = d3.mouse(this);
+
+		  svgC.insert("circle", "#circles")
+		      .attr("cx", 100 + inStep)
+		      .attr("cy", 100 + inAmplitude)
+		      .attr("r", 1e-6)
+		      .style("stroke", d3.hsl((i = (i + 1) % 360), 1, .5))
+		      .style("stroke-opacity", 1)
+		    .transition()
+		      .duration(2000)
+		      .ease(Math.sqrt)
+		      .attr("r", 100)
+		      .style("stroke-opacity", 1e-6)
+		      .remove();
+
+		  //d3.event.preventDefault();
+		}
+
+		var context;
+		var myAudioBuffer = null;
+		var analyser;
+		
+		var spec_view;
+		var WIDTH = 640;
+		var HEIGHT = 320;
+		
+		var PITCH_MIN = 36;
+		var PITCH_MAX = 108;
+		var PITCH_STEP = 1;
+		var pitch_range = [];
+		var pitch_range_hz = [];
+
+		var data = []; // pitch data
+
+		var cnt =0,
+			day_cnt = 0,
+			hour_cnt = 1;
+		var pitch_stack = 0;
+
+		/// HEAT MAP START
+		var margin = { top: 50, right: 0, bottom: 100, left: 30 },
+				width = 960 - margin.left - margin.right,
+				//height = 430 - margin.top - margin.bottom,
+				height = 150,
+				gridSize = Math.floor(width / 24),
+				legendElementWidth = gridSize*2,
+				buckets = 9,
+				colors = ["#ffffd9","#edf8b1","#c7e9b4","#7fcdbb","#41b6c4","#1d91c0","#225ea8","#253494","#081d58"], // alternatively colorbrewer.YlGnBu[9]
+				days = ["1M", "2M", "3M"],
+				times = ["1s", "2s", "3s", "4s", "5s", "6s", "7s", "8s", "9s", "10s", "11s", "12s", "13s", "14s", "15s", "16s", "17s", "18s", "19s", "20s"];
+				datasets = ["data.tsv", "data2.tsv"];
+
+		var svg = d3.select("#chart").append("svg")
+				.attr("width", width + margin.left + margin.right)
+				.attr("height", height + margin.top + margin.bottom)
+				.append("g")
+				.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var dayLabels = svg.selectAll(".dayLabel")
+				.data(days)
+				.enter().append("text")
+					.text(function (d) { return d; })
+					.attr("x", 0)
+					.attr("y", function (d, i) { return i * gridSize; })
+					.style("text-anchor", "end")
+					.attr("transform", "translate(-6," + gridSize / 1.5 + ")")
+					.attr("class", function (d, i) { return ((i >= 0 && i <= 4) ? "dayLabel mono axis axis-workweek" : "dayLabel mono axis"); });
+
+		var timeLabels = svg.selectAll(".timeLabel")
+				.data(times)
+				.enter().append("text")
+					.text(function(d) { return d; })
+					.attr("x", function(d, i) { return i * gridSize; })
+					.attr("y", 0)
+					.style("text-anchor", "middle")
+					.attr("transform", "translate(" + gridSize / 2 + ", -6)")
+					.attr("class", function(d, i) { return ((i >= 7 && i <= 16) ? "timeLabel mono axis axis-worktime" : "timeLabel mono axis"); });
+
+
+		//[{"day": 1, "hour": 2, "value":50}, {"day": 1, "hour": 3, "value":30}];
+		var heatmapChart = function(tsvFile) {
+			data.push(tsvFile);
+
+			var colorScale = d3.scale.quantile()
+						.domain([PITCH_MIN+50, buckets - 1, PITCH_MAX])
+						.range(colors);
+
+				var cards = svg.selectAll(".hour")
+						.data(data, function(d) {return d.day+':'+d.hour;});
+
+				cards.append("title");
+
+				cards.enter().append("rect")
+						.attr("x", function(d) { return (d.hour - 1) * gridSize; })
+						.attr("y", function(d) { return (d.day - 1) * gridSize; })
+						.attr("rx", 4)
+						.attr("ry", 4)
+						.attr("class", "hour bordered")
+						.attr("width", gridSize)
+						.attr("height", gridSize)
+						.style("fill", colors[0]);
+
+				cards.transition().duration(1000)
+						.style("fill", function(d) {return colorScale(d.value); });
+
+				cards.select("title").text(function(d) { return d.value; });
+				
+				cards.exit().remove();
+
+				var legend = svg.selectAll(".legend")
+						.data([0].concat(colorScale.quantiles()), function(d) { return d; });
+				//console.log(colorScale.quantiles());
+				legend.enter().append("g")
+						.attr("class", "legend");
+
+				legend.append("rect")
+					.attr("x", function(d, i) { return legendElementWidth * i; })
+					.attr("y", height)
+					.attr("width", legendElementWidth)
+					.attr("height", gridSize / 2)
+					.style("fill", function(d, i) { return colors[i]; });
+
+				legend.append("text")
+					.attr("class", "mono")
+					.text(function(d) { return "≥ " + Math.round(d); })
+					.attr("x", function(d, i) { return legendElementWidth * i; })
+					.attr("y", height + gridSize);
+
+				legend.exit().remove(); 
+		};
+
+		heatmapChart({"day": 1, "hour": 1, "value":70});
+		
+		var datasetpicker = d3.select("#dataset-picker").selectAll(".dataset-button")
+			.data(datasets);
+
+		datasetpicker.enter()
+			.append("input")
+			.attr("value", function(d){ return "Dataset " + d })
+			.attr("type", "button")
+			.attr("class", "dataset-button")
+			.on("click", function(d) {
+				heatmapChart({"day": 1, "hour": 4, "value":10});
+			});
+		/// HEAT MAP END
+			
+		//
+		window.onload=function(){
+			// file open button
+			var control = document.getElementById("fileChooseInput");
+			control.addEventListener("change", fileChanged, false);
+
+			// create audio context
+			context = new AudioContext();
+			
+			// analyzer
+		    analyser = context.createAnalyser();
+		    analyser.fftSize = 4096;
+			
+			// pitch range of interest
+			for (var pitch = PITCH_MIN; pitch <= PITCH_MAX; pitch = pitch + PITCH_STEP) 
+			{
+				pitch_range.push(pitch);
+				pitch_range_hz.push(midi2hertz(pitch))
+			}	
+		}
+		
+		function midi2hertz(midi) {
+			var hertz;
+			///// YOUR CODE IS HERE /////
+			var a = 440; // a is 440 hz...
+			
+			hertz = (a / 32) * Math.pow(2, (midi - 9) / 12);
+			
+			/////////////////////////////
+			return hertz;
+		}
+		
+		function draw_spec() {
+			// get magnitude response 
+			var dataArray = new Float32Array(analyser.frequencyBinCount);
+			analyser.getFloatFrequencyData(dataArray);
+
+			// MIDI scale power
+			var midi_power = new Float32Array(pitch_range_hz.length-1);
+			var NUM_HARMONICS = 15;	
+
+			///// YOUR CODE IS HERE /////
+			var comb_filter = new Array(dataArray.length);
+			var sum_filter = new Array(dataArray.length);
+			for (var i = 0; i < dataArray.length; i++) {
+				comb_filter[i] = new Array(pitch_range.length);
+				sum_filter[i] = new Array(pitch_range.length);
+			}
+
+			var binfrqs = [];
+			for (var i = 0;i < dataArray.length; i++) {
+				binfrqs[i] = i/analyser.fftSize*context.sampleRate;
+			}
+
+			var FLAG = true;
+			// pitch range of interest
+			for (var pitch = 0; pitch < pitch_range.length; pitch++) 
+			{
+				for (var f= 0;f< dataArray.length; f++) {
+					//Boundary
+					if(binfrqs[f] > NUM_HARMONICS*pitch_range_hz[pitch]) {
+						comb_filter[f][pitch] = 0;
+						sum_filter[f][pitch] = 0;
+					}
+
+					else if(binfrqs[f] < pitch_range_hz[pitch]/2) {
+						comb_filter[f][pitch] = 0;
+						sum_filter[f][pitch] = 0;
+					}
+
+					else {
+						comb_filter[f][pitch] = 0.5 * Math.cos(2*Math.PI*binfrqs[f]/pitch_range_hz[pitch]) + 0.5;
+						sum_filter[f][pitch] = 1;
+					}
+
+
+				}
+			}	
+
+			for(var f = 0; f < dataArray.length; f++) {
+				//Convert to power instead of decible: Spec power
+				dataArray[f] = Math.pow(10, dataArray[f]/10);
+
+				//Spec power
+				//dataArray[i] = Math.pow(dataArray[i], 2);
+			}
+
+			var pitch_gram = new Array(pitch_range.length);
+			var energy = new Array(pitch_range.length);
+
+
+			// Comb-filtering
+			for(var p = 0; p < pitch_range.length; p++) {
+				pitch_gram[p] = 0;
+				energy[p] = 0;
+
+				for(var f = 0; f < dataArray.length; f++) {
+					pitch_gram[p] += (comb_filter[f][p] * dataArray[f]);
+					energy[p] += (sum_filter[f][p] * dataArray[f]);
+				}
+
+				
+			}
+
+			var max_pitchgram = -1;
+			var max_index = 0;
+			//Max-likelihood
+			// Find the max of pitch after filtering comb filter
+			for (var c=0; c < pitch_range.length; c++) {
+			
+				if(max_pitchgram < pitch_gram[c]) {
+					max_pitchgram = pitch_gram[c];
+					max_index = c;
+				}
+			}	
+
+			var FREQ_STEP = Math.round(dataArray.length / midi_power.length)/4;
+
+			for(var i = 0; i < midi_power.length; i++)	{
+				var sum = 0;
+				for(var s = 0; s < FREQ_STEP; s++)
+					sum += dataArray[i*FREQ_STEP+s];
+			
+				midi_power[i]  = sum / FREQ_STEP;
+			}
+
+			/////////////////////////////
+			if ( max_pitchgram / energy[max_index] > 0.5 ) {
+				var detected_pitch_position = pitch_range_hz[max_index]*width/(dataArray.length)*2;
+				detected_pitch_position = Math.min(width-100, detected_pitch_position);
+
+				var inAmplitude = Math.max.apply(null, dataArray);
+				
+
+				pitch_stack += pitch_range[max_index];
+				if(cnt++ % 25 == 0 && cnt > 30) {
+					pitch_stack /= 25;
+
+					if(hour_cnt == 21)
+						hour_cnt = 1;
+					
+					if(hour_cnt == 1)
+						day_cnt ++;
+
+					if(day_cnt <4)
+						heatmapChart({"day": day_cnt, "hour": hour_cnt++, "value":pitch_stack});
+
+
+					pitch_stack = 0;
+				}
+
+				amp_scale = 3000;
+				sensitivity = 0.01;
+				decay_coef = 0.95;
+
+				inAmplitude = amp_scale*Math.log(1.0+1.0/sensitivity*inAmplitude)/Math.log(1.0+1.0/sensitivity);
+				inAmplitude = Math.min(200, inAmplitude);
+				particle(inAmplitude, Math.round(detected_pitch_position));
+			}
+			
+			// queue for next callback
+			window.requestAnimationFrame(draw_spec);
+		}
+		
+
+		function fileChanged(e){
+			var file = e.target.files[0];
+			var fileReader = new FileReader();
+			fileReader.onload = fileLoaded;
+			fileReader.readAsArrayBuffer(file);
+		}
+
+		function fileLoaded(e){
+		    context.decodeAudioData(e.target.result, function(buffer) {
+		      myAudioBuffer = buffer;
+		    });
+		}
+
+		var source = null;
+		function playSound(anybuffer) {
+		  source = context.createBufferSource();
+		  source.buffer = anybuffer;
+		  source.connect(context.destination);
+		  
+		  // connect source to analyser
+		  source.connect(analyser);
+		  
+		  source.start();
+		  
+		  // visualize audio
+		  draw_spec();
+		}
+
+		function stopSound() {
+		  if (source) {
+		    source.stop();
+		  }
+		}	   	
+	</script>
+</body>
+</html>

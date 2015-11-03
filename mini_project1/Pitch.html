@@ -1,0 +1,223 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title> Audio Visualization </title>
+</head>
+<body>
+	<h1> Mini Project #1: Pitch Tracking </h1>		
+	
+	<p><canvas id='spec_view' style="background: white;"></canvas></p>
+
+	<script>	
+	var context;
+	var myAudioBuffer = null;
+	var analyser;
+	
+	var spec_view;
+	var WIDTH = 640;
+	var HEIGHT = 320;
+	
+	
+	// initial setting for pitch detection
+	var PITCH_MIN = 36;
+	var PITCH_MAX = 96;
+	var PITCH_STEP = 0.25;
+	var pitch_range = [];
+	var pitch_range_hz = [];
+	var NUM_HARMONICS = 15;	
+
+	window.onload=function(){		
+		// canvas 
+		spec_view = document.getElementById("spec_view");
+		spec_view.width =  WIDTH;
+		spec_view.height = HEIGHT;	
+		
+		// create audio context
+		context = new AudioContext();
+		
+		// analyzer
+	    analyser = context.createAnalyser();
+	    analyser.fftSize = 2048;
+		analyser.smoothingTimeConstant = 0;		
+		
+		// pitch range of interest
+		for (var pitch = PITCH_MIN; pitch <= PITCH_MAX; pitch = pitch + PITCH_STEP) 
+		{
+			pitch_range.push(pitch);
+			pitch_range_hz.push(midi2hertz(pitch))
+		}		
+	}
+	
+	function midi2hertz(midi) {
+		var hertz;
+		///// YOUR CODE IS HERE /////
+		var a = 440; // a is 440 hz...
+		
+		hertz = (a / 32) * Math.pow(2, (midi - 9) / 12);
+
+		/////////////////////////////
+		return hertz;
+	}
+	
+	function draw_spec() {
+		// 2d canvas context
+		var drawContext = spec_view.getContext('2d');
+		
+		// fill rectangular
+		drawContext.fillStyle = 'rgb(200, 200, 200)';
+		drawContext.fillRect(0, 0, WIDTH, HEIGHT);
+
+		// drawing line setting
+		drawContext.lineWidth = 2;
+		drawContext.strokeStyle = 'rgb(0, 0, 0)';
+		drawContext.beginPath();
+				
+		// get samples 
+		var dataArray = new Float32Array(analyser.frequencyBinCount);
+		analyser.getFloatFrequencyData(dataArray);
+		
+		var freq_scale = 10;
+		var sliceWidth = WIDTH * 1.0 / (dataArray.length/freq_scale);
+		var x = 0;
+
+		// display spectrum up to Nyquist_Frequency/10
+		for (var i = 0; i < dataArray.length/freq_scale; i++) {
+	        var v = (dataArray[i] + 100)/50;
+	        var y = HEIGHT - v * HEIGHT/2;
+
+	    	if(i === 0) {
+	        	drawContext.moveTo(x, y);
+	        } else {
+	        	drawContext.lineTo(x, y);
+	        }
+
+	        x += sliceWidth;
+		}
+
+		// last touch
+		drawContext.lineTo(draw_spec.width, draw_spec.height/2);
+		drawContext.stroke();
+
+		//
+		// pitch detection
+		//
+		// Refer to the stft_pitch.m file (MATLAB) to implement the pitch detection algorithm
+
+		///// YOUR CODE IS HERE /////
+		var comb_filter = new Array(dataArray.length);
+		var sum_filter = new Array(dataArray.length);
+		for (var i = 0; i < dataArray.length; i++) {
+			comb_filter[i] = new Array(pitch_range.length);
+			sum_filter[i] = new Array(pitch_range.length);
+		}
+
+		var binfrqs = [];
+		for (var i = 0;i < dataArray.length; i++) {
+			binfrqs[i] = i/analyser.fftSize*context.sampleRate;
+		}
+
+		var FLAG = true;
+		// pitch range of interest
+		for (var pitch = 0; pitch < pitch_range.length; pitch++) 
+		{
+			for (var f= 0;f< dataArray.length; f++) {
+				//Boundary
+				if(binfrqs[f] > NUM_HARMONICS*pitch_range_hz[pitch]) {
+					comb_filter[f][pitch] = 0;
+					sum_filter[f][pitch] = 0;
+				}
+
+				else if(binfrqs[f] < pitch_range_hz[pitch]/2) {
+					comb_filter[f][pitch] = 0;
+					sum_filter[f][pitch] = 0;
+				}
+
+				else {
+					comb_filter[f][pitch] = 0.5 * Math.cos(2*Math.PI*binfrqs[f]/pitch_range_hz[pitch]) + 0.5;
+
+					sum_filter[f][pitch] = 1;
+				}
+			}
+		}	
+
+		for(var f = 0; f < dataArray.length; f++) {
+			//Convert to power instead of decible: Spec power
+			dataArray[f] = Math.pow(10, dataArray[f]/10);
+
+			//Spec power
+			//dataArray[i] = Math.pow(dataArray[i], 2);
+		}
+
+		var pitch_gram = new Array(pitch_range.length);
+		var energy = new Array(pitch_range.length);
+
+
+		// Comb-filtering
+		for(var p = 0; p < pitch_range.length; p++) {
+			pitch_gram[p] = 0;
+			energy[p] = 0;
+
+			for(var f = 0; f < dataArray.length; f++) {
+				pitch_gram[p] += (comb_filter[f][p] * dataArray[f]);
+				energy[p] += (sum_filter[f][p] * dataArray[f]);
+			}
+		}
+
+		var max_pitchgram = -1;
+		var max_index = 0;
+
+		//Max-likelihood
+		// Find the max of pitch after filtering comb filter
+		for (var c=0; c < pitch_range.length; c++) {
+			if(max_pitchgram < pitch_gram[c]) {
+				max_pitchgram = pitch_gram[c];
+				max_index = c;
+			}
+		}	
+
+		/////////////////////////////		
+		drawContext.font = "30px Arial";
+		if ( max_pitchgram / energy[max_index] > 0.7 )  
+		{
+			var detected_pitch_position = pitch_range_hz[max_index]*WIDTH/(context.sampleRate/freq_scale)*2;   
+			drawContext.strokeText(detected_pitch_position + " Hz",100,50);
+						
+			drawContext.fillStyle = 'rgb(100,0,0)';
+			drawContext.fillRect(detected_pitch_position, 0, 2, HEIGHT);
+		}
+
+		// queue for next callback
+		window.requestAnimationFrame(draw_spec);
+	}
+	
+
+	
+	if (!navigator.getUserMedia)
+		navigator.getUserMedia = (navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia);
+							  
+	if (!navigator.getUserMedia)
+		alert("Error: getUserMedia not supported!");
+						
+	// get audio input streaming 				 
+	navigator.getUserMedia({audio: true}, onStream, onStreamError)
+
+	// successCallback
+	function onStream(stream) {
+	    var input = context.createMediaStreamSource(stream);
+		
+		// Connect graph
+		input.connect(analyser);
+							  
+		// visualize audio
+		draw_spec();	
+	}
+	
+	// errorCallback			 
+	function onStreamError(error) {
+		console.error('Error getting microphone', error);
+	}
+
+	</script>
+</body>
+</html>
