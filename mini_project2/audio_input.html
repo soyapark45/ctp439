@@ -1,0 +1,61 @@
+<!doctype html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title> Play with biquad filters with microphone input </title>
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+		<script src="./js/jquery.knob.js"></script>		
+		<script src="audio_input.js"></script>
+		<link rel="stylesheet" type="text/css" href="multi_effect.css">
+</head>
+<body>		
+	<h1> <h1> Mini Project #2-3: Multi-Effect Units with microphone input </h1> </h1>
+
+	<div id="filters" class="module">
+		<h2>Filters</h2>	
+		<p><input type="checkbox" onclick="toggleFilterBypass()" id="filterBypass">Bypass</input>	 </p>
+		<p><select id="filtersDropdown"> </select> </p>
+  	
+		<canvas id="amp_response" width="512" height ="256"></canvas>
+
+		<div class="knob">
+			<p> Frequency </p>
+			<input class="filter_freq_knob" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="5000" >		
+		</div>
+		<div class="knob">
+			<p> Q </p>
+			<input class="filter_Q_knob" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="1" >
+		</div>
+		<div class="knob">
+			<p> Gain </p>
+			<input class="filter_gain_knob" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="4" >
+		</div>
+	</div>
+	
+	<div id="delay" class="module">
+		<h2>Delay</h2>	
+		<p><input type="checkbox" onclick="toggleDelayBypass()" id="delayBypass">Bypass</input></p>	
+
+		<div class="knob">
+			<p> Delay Time </p>
+			<input class="delay_delay_time" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="0.5" >
+		</div>
+		<div class="knob">
+			<p> Feedback Gain </p>
+			<input class="delay_feedback_gain" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="0.1" >
+		</div>
+	</div>
+
+	<div id="reverb" class="module">
+		<h2>Reverb</h2>	
+		<p><input type="checkbox" onclick="toggleReverbBypass()" id="reverbBypass">Bypass</input>	</p>
+		<p><select id="reverbDropdown"> </select> </p>
+
+		<div class="knob">
+			<p> Wet/Dry Ratio </p>
+			<input class="reverb_wet_dry_ratio" data-width="80" data-angleOffset=-125 data-angleArc=250 data-fgColor="#222" value="0.2" >
+		</div>
+	</div>
+
+</body>
+</html>

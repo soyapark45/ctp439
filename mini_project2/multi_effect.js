@@ -1,4 +1,5 @@
 	var context = new AudioContext();
+	var gainNode = context.createGain();
 
 	// Buffer source
 	var source = null;
@@ -45,7 +46,11 @@
 	var reverb_types = [
 		"sample1.wav",
 		"sample2.wav",
-		"sample3.wav"
+		"sample3.wav",
+		//#2. add three more convolver
+		"ortf.wav",
+		"sportcentre.wav",
+		"st-mary.wav"
 	];
 
 	var reverb_params = {
@@ -223,8 +228,71 @@
 		reverb_params.type = reverbName;		
 		updateReverb(); 		
 	}
+
+	function isFilterBypass(){
+		return $("#filterBypass").is( ":checked" );
+	}
+
+	function isDelayBypass() {
+		return $("#delayBypass").is( ":checked" );
+	}
 	
+	function isReverbBypass() {
+		return $("#reverbBypass").is( ":checked" );
+	}
+
+	function toggleFilterBypass(){
+		if(source == null) return;
+
+		if( isFilterBypass() ) {			
+			biquad.disconnect();
+			console.log("here");		
+		}
+
+		cascadeEffect();		
+	}
 	
+	function toggleDelayBypass() {
+		if(source == null) return;
+
+		if( isDelayBypass() ) {
+			delay.disconnect();		
+		}
+
+		cascadeEffect();	
+	}	
+
+	function toggleReverbBypass() {
+		if(source == null) return;
+
+		if( isReverbBypass() ) {
+			convolver.disconnect();		
+		}
+
+		cascadeEffect();	
+	}
+
+	function cascadeEffect() {
+		var effects = [];
+		if (!isFilterBypass()) effects.push(biquad);
+		if(!isDelayBypass()) effects.push(delay);
+		if(!isReverbBypass()) effects.push(convolver);
+
+		if(effects.length == 0) {
+			source.connect(gainNode);		
+		}
+
+		else {
+			source.connect(effects[0]);
+			for(var i =1;i < effects.length;i++)
+				effects[i-1].connect(effects[i]);
+
+			effects[effects.length - 1].connect(gainNode);
+		}
+		
+		gainNode.connect(context.destination);
+	}
+
 	///////////////////////////////////////////
 	// update filter parameters
 	function updateFilter() {		
@@ -308,14 +376,9 @@
 		// fill out the following part
 		/////////////////////////////////////////////////////
 
-	
-	
-	
-	
-	
-	
-	
-	
+		// connecting the three audio effects
+		cascadeEffect();
+
 		/////////////////////////////////////////////////////
 
 		source.start();
