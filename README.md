@@ -9,4 +9,6 @@ I utilize the graphic library d3. Additionally, for heat-map, I make good use of
 
 ![alt tag](https://cloud.githubusercontent.com/assets/3036721/11266082/1a33465c-8ee5-11e5-8724-2619d32a7845.png)
 
+##Designing FM Sound (mini-project 3)
+
 ##Electric Theremin (final project)
