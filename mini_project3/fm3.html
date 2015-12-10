@@ -1,0 +1,65 @@
+<!doctype html>
+   	<html>
+	<head>
+		<title>FM Synthesizer</title>
+		
+		
+	</head>
+
+	<body>
+
+		<h1> FM Synthesizer </h1>
+		<p><select id="PresetDropDown"> </select> </p>
+		<div id="keyboard"></div>
+		
+		<link rel="stylesheet" type="text/css" href="fm.css"> 
+		<script type="text/javascript" src="nexusUI.js"></script>
+		<script src="qwerty-hancock.js"></script>
+
+	
+		<div class="dial-knob">
+		  	Modulation Index (Max: 10)
+		  	<canvas nx="dial" id="modulationIndex" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Filter Frequency (Max: 5000)
+		  	<canvas nx="dial" id="FilterFreq" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Filter Frequency Target (Max: 5000)
+		  	<canvas nx="dial" id="FilterFreqTarget" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Filter Frequency Decay Time (Max: 10)
+		  	<canvas nx="dial" id="FilterFreqDecayTime" height="100" width="100"></canvas>
+		</div>
+		<div></div>
+		<div class="dial-knob">
+		  	Wet/dry ratio (Max: 1)
+		  	<canvas nx="dial" id="reverbRatio" height="100" width="100"></canvas>
+		</div>
+			Amplitude Envelope (Max: 10)
+		<canvas nx="envelope" id="Envelope" height="150" width="600"></canvas>
+		<!-- <div class="dial-knob">
+		  	AmpEnv Attack Time (Max: 10)
+		  	<canvas nx="dial" id="AmpEnvAttackTime" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Decay Time (Max: 10)
+		  	<canvas nx="dial" id="AmpEnvDecayTime" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Sustain Level (Max: 10)
+		  	<canvas nx="dial" id="AmpEnvSustainLevel" height="100" width="100"></canvas>
+		</div>
+		<div class="dial-knob">
+		  	Release Time (Max: 10)
+		  	<canvas nx="dial" id="AmpEnvReleaseTime" height="100" width="100"></canvas>
+		</div> -->
+
+		  <!-- slider
+		  <canvas nx="slider" id="slider1"></canvas> -->
+		  <script src="fm.js"></script>
+	</body>
+	
+</html>
