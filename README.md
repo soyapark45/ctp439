@@ -9,7 +9,7 @@ I utilize the graphic library d3. Additionally, for heat-map, I make good use of
 
 ![alt tag](https://cloud.githubusercontent.com/assets/3036721/11266082/1a33465c-8ee5-11e5-8724-2619d32a7845.png)
 
-##Designing FM Sound (mini-project 3)
+##Web Theremin (final project)
+This is web theremin having two antenna pitch and volume, respectively. It has supplemental features such as music effects and download presets. 
 
-##Electric Theremin (final project)
 ![alt tag](https://cloud.githubusercontent.com/assets/3036721/11902262/dd9c175c-a5f3-11e5-9cbb-3b547e3dc7f7.png)
