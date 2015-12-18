@@ -39,7 +39,7 @@ function loadImpulseResponse(inType) {
 
 
 /* Oscillator object. */
-function Oscillator() {
+Oscillator = function() {
 	//var context = new AudioContext();
 	oscillator = context.createOscillator();
 	// Create a volume (gain) node
@@ -153,15 +153,6 @@ function setInitialParam(inParam) {
 	inParam = inParam || DefaultParam;
 
 	/* Set initial value of knobs. */
-	// dialFrequency.val.value = inParam.frequency / MaxParam.frequency;
-	// dialFrequency.draw();
-
-	// dialQ.val.value = inParam.Q / MaxParam.Q;
-	// dialQ.draw();
-
-	// dialGain.val.value = inParam.gain / MaxParam.gain;
-	// dialGain.draw();
-
 	dialDelay.val.value = inParam["delay"] / MaxParam.delay;
 	dialDelay.draw();
 
@@ -174,25 +165,6 @@ function setInitialParam(inParam) {
 	// updateFilter();
 	updateDelay();
 	updateReverb();
-  	// modulationIndex.val.value = synth.parameters.modulationIndex/scale_param.modulationIndex;
-  	// modulationIndex.draw();
-
-  	// /* Set amplitude envelope. */
-  	// var env = synth.parameters.AmpEnvAttackTime/scale_param.AmpEnv;
-  	// Envelope.val.points = [{x:env, y:0.8}, 
-  	// 						{x: env += synth.parameters.AmpEnvDecayTime/scale_param.AmpEnv, y:0.5}, 
-  	// 						{x: env += synth.parameters.AmpEnvSustainLevel/scale_param.AmpEnv, y:0.5},
-  	// 						{x: env += synth.parameters.AmpEnvReleaseTime/scale_param.AmpEnv, y:0}];
-  	// Envelope.draw();
-
-  	// FilterFreq.val.value = synth.parameters.FilterFreq/scale_param.FilterFreq;
-  	// FilterFreq.draw();
-
-  	// FilterFreqTarget.val.value = synth.parameters.FilterFreqTarget/scale_param.FilterFreqTarget;
-  	// FilterFreqTarget.draw();
-
-  	// FilterFreqDecayTime.val.value = synth.parameters.FilterFreqDecayTime/scale_param.FilterFreqDecayTime;
-  	// FilterFreqDecayTime.draw();
 }
 
 function getCurrentParam() {
@@ -205,16 +177,8 @@ function getCurrentParam() {
 	};
 }
 
-function isFilterBypass(){
-	return $("#switch-filter").is( ":checked" );
-}
-
 function isDelayOn() {
 	return $("#switch-delay").is( ":checked" );
-}
-
-function isReverbBypass() {
-	return $("#switch-reverb").is( ":checked" );
 }
 
 // update filter parameters
