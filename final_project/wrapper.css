@@ -1,0 +1,72 @@
+#preview {
+	background-image: url('resources/theremin_front.png');
+	background-repeat: no-repeat;
+	background-size: 300px 210px;
+	float: right;
+}
+
+.container.play { 
+	padding-bottom: 50em !important;
+}
+
+#export {
+	float: left;
+	/*margin-top: 6s0px;*/
+    margin-right: 50px;
+	margin-left: 50px;
+}
+
+.box {
+	/*float: left;*/
+	display: inline-block;
+	width: 300px;
+	height: 300px;
+	font-size: 155px;
+	padding-right: 15px;
+    padding-left: 15px;
+    border-radius: 6px;
+    padding-top: 30px;
+    padding-bottom: 30px;
+    margin-bottom: 30px;
+    color: gray;
+    background-color: #eee;
+}
+
+#containter-filter{
+	background-color:lightgrey;
+    height: 145px;
+    width: 480px;
+    float: left;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+
+#containter-delay{
+	background-color:lightgrey;
+    height: 145px;
+    width: 310px;
+    float: left;
+    border-radius: 6px;
+    margin-right: 10px;
+}
+
+#containter-reverb{
+	background-color:lightgrey;
+    height: 145px;
+    width: 150px;
+    float: left;
+    border-radius: 6px;
+}
+
+#containter-setting
+p
+{
+	margin: 10px;
+	float:left;
+}
+
+.dial-knob {text-align: center; float:left; margin: 5px; width: 140px;}
+
+.wrapper.style1.play {
+    padding-top: 5em;
+}

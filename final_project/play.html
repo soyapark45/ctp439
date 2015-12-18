@@ -1,0 +1,171 @@
+<!DOCTYPE HTML>
+
+<!-- Author: Soya Park <soya@kaist.ac.kr> -->
+<!-- Date: Nov. 18th 2015 -->
+
+<html>
+	<head>
+		<title>Web Theremin</title>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<!--[if lte IE 8]><script src="css/ie/html5shiv.js"></script><![endif]-->
+		<script src="js/jquery.min.js"></script>
+		<script src="js/jquery.dropotron.min.js"></script>
+		<script src="js/skel.min.js"></script>
+		<script src="js/skel-layers.min.js"></script>
+		<script src="js/init.js"></script>
+
+		<!-- Bootstrap -->
+	    <!-- <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet"> -->
+	    <link href="lib/bootstrap/css/bootstrap-switch.min.css" rel="stylesheet">
+
+		<link rel="stylesheet" type="text/css" href="wrapper.css"> 
+
+	    <!-- Include all compiled plugins (below), or include individual files as needed -->
+	    <script src="lib/bootstrap/js/bootstrap.min.js"></script>
+	    <script src="lib/bootstrap/js/highlight.js"></script>
+	    <script src="lib/bootstrap/js/bootstrap-switch.min.js"></script>
+	    <script src="lib/bootstrap/js/main.js"></script>
+
+		<!-- Library import -->
+		<script language="JavaScript" src="lib/circularbuffer.js"></script>
+		<script language="JavaScript" src="lib/events.js"></script>
+		<script language="JavaScript" src="lib/detectors.js"></script>
+		<script language="JavaScript" src="lib/main.js"></script>
+		<script type="text/javascript" src="lib/nexusUI.js"></script>
+		<script src="http://crypto-js.googlecode.com/svn/tags/3.1.2/build/rollups/rc4.js"></script>
+
+		<!-- Application implementation -->
+		<script language="JavaScript" src="audio.js"></script>
+		<script language="JavaScript" src="app.js"></script>
+		<script language="JavaScript" src="white_noise.js"></script>
+
+		<noscript>
+			<link rel="stylesheet" href="css/skel.css" />
+			<link rel="stylesheet" href="css/style.css" />
+			<link rel="stylesheet" href="css/style-wide.css" />
+		</noscript>
+		<!--[if lte IE 8]><link rel="stylesheet" href="css/ie/v8.css" /><![endif]-->
+	</head>
+	<body style="background-color:lightgrey">
+
+		<!-- Wrapper -->
+			<div class="wrapper style1 play">
+
+				<!-- Header -->
+					<div id="header" class="skel-panels-fixed">
+						<div id="logo">
+							<h1><a href="index.html">Web theremin</a></h1>
+							<span class="tag">by Soya Park</span>
+						</div>
+						<nav id="nav">
+							<ul>
+								<li class="active"><a href="index.html">Home</a></li>
+								<li><a href="play.html">Play</a></li>
+								<li><a href="contact.html">Contact</a></li>
+							</ul>
+						</nav>
+					</div>
+
+				<!-- Banner -->
+					<!-- <div class="box" id="note-denoter"></div> -->
+					<div id="banner" class="container play">
+						
+
+						<div class="box" id="note-denoter">
+							<br><br><br><br>
+						  <h1 id="note">.</h1>
+						</div>
+						<canvas id="preview" width="300" height="215"></canvas><div></div>
+						<br><br><br>
+						<!-- Music effects -->
+						<!-- <div id="containter-filter">
+							<div class="dial-knob">
+							  	<h3>Frequency</h3>
+							  	<canvas nx="dial" id="dialFrequency" height="100" width="100"></canvas>
+							</div>
+							<div class="dial-knob">
+							  	<h3>Q</h3>
+							  	<canvas nx="dial" id="dialQ" height="100" width="100"></canvas>
+							</div>
+							<div class="dial-knob">
+							  	<h3>Gain</h3>
+							  	<canvas nx="dial" id="dialGain" height="100" width="100"></canvas>
+							</div>
+						</div> -->
+						<!-- Export -->
+						<div id="export">
+							
+							<label for="files"> <i style="cursor:pointer" class="fa fa-upload fa-5x"></i> </label>
+							<input style="visibility: hidden; position: absolute;" id="files" class="form-control"
+                   				 type="file" name="files" onchange="handleFiles(this.files)"></input><br>
+
+                    		
+							<a href="" id="download" onclick="setupDownloadLink(this)" download="export.json"><i class="fa fa-cloud-download fa-5x" ></i></a>
+							
+						</div>
+
+						<div id="containter-delay">
+							<div class="dial-knob">
+							  	<h3>Delay</h3>
+							  	<canvas nx="dial" id="dialDelay" height="100" width="100"></canvas>
+							</div>
+							<div class="dial-knob">
+							  	<h3>Feedback</h3>
+							  	<canvas nx="dial" id="dialFeedback" height="100" width="100"></canvas>
+							</div>
+						</div>
+						<div id="containter-reverb">
+							<div class="dial-knob">
+							  	<h3>Wet/Dry</h3>
+							  	<canvas nx="dial" id="dialReverb" height="100" width="100"></canvas>
+							</div>
+						</div>
+
+						<!-- Setting dropdowns and checkbox -->
+						<div></div>
+						<div id="containter-setting">
+							<!-- <p>Filter
+			              		<input id="switch-filter" type="checkbox" checked>
+			            	</p> -->
+			            	<p>Delay
+			              		<input id="switch-delay" type="checkbox" checked>
+			            	</p><br><br><br>
+			            	<!-- <p><select id="dropDown-delay"> </select> </p> -->
+			            	<p>Reverb
+			              		<!-- <input id="switch-reverb" type="checkbox" checked> -->
+			            	</p>
+			            	<p><select id="dropDown-reverb"> </select> </p>
+
+						</div>
+						
+
+						<!-- FM -->
+						<!-- <div class="dial-knob">
+						  	<h3>Modulation Index</h3>
+						  	<canvas nx="dial" id="modulationIndex" height="100" width="100"></canvas>
+						</div>
+						<h3>Amplitude Envelope</h3>
+						<canvas nx="envelope" id="Envelope" height="100" width="500"></canvas> -->
+					</div>
+
+		
+					
+
+	<!-- Copyright -->
+		<!-- <div id="copyright">
+			<div class="container">
+				<div class="copyright">
+					<p>Design: <a href="http://templated.co">TEMPLATED</a> Images: <a href="http://unsplash.com">Unsplash</a> (<a href="http://unsplash.com/cc0">CC0</a>)</p>
+					<ul class="icons">
+						<li><a href="#" class="fa fa-facebook"><span>Facebook</span></a></li>
+						<li><a href="#" class="fa fa-twitter"><span>Twitter</span></a></li>
+						<li><a href="#" class="fa fa-google-plus"><span>Google+</span></a></li>
+					</ul>
+				</div>
+			</div>
+		</div> -->
+
+	</body>
+</html>
