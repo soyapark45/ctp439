@@ -12,3 +12,4 @@ I utilize the graphic library d3. Additionally, for heat-map, I make good use of
 ##Designing FM Sound (mini-project 3)
 
 ##Electric Theremin (final project)
+![alt tag](https://cloud.githubusercontent.com/assets/3036721/11902262/dd9c175c-a5f3-11e5-9cbb-3b547e3dc7f7.png)
